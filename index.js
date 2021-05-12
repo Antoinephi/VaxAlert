@@ -1,15 +1,20 @@
 const fetch = require('node-fetch');
 const PushBullet = require('pushbullet/lib/pushbullet');
+
 const apiKey = process.argv[2];
 const delayDuration = process.argv[3] || 60000;
 const city = process.argv[4] || 'Lille';
+if(process.argv.length < 2 || process.argv.length === 4) {
+    throw Error('Missing argument: node index.js <pushbullet API key> <delay> <city>')
+}
+
 const pusher = new PushBullet(apiKey);
 
 const delay = (ms) => {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-const isNotAGoodVaccine = (types) => {
+const notEligibleVaccineType = (types) => {
     if(!types) return false;
     return types.toString() === ['AstraZeneca'].toString()
 }
@@ -17,13 +22,14 @@ const isNotAGoodVaccine = (types) => {
 void async function () {
     let slots = {};
     while (true) {
-           const data = await (await fetch("https://vitemadose.gitlab.io/vitemadose/59.json")).json();
-            await data.centres_disponibles
-                .filter(c => {
+           const data = await fetch("https://vitemadose.gitlab.io/vitemadose/59.json");
+           const { centres_disponibles }  = await data.json();
+
+                centres_disponibles.filter(c => {
                     if (!c.location || c.location.city !== city) {
                         return false;
                     }
-                    if (isNotAGoodVaccine(c.vaccine_type)) {
+                    if (notEligibleVaccineType(c.vaccine_type)) {
                         return false;
                     }
                     if(!c.appointment_schedules) {
