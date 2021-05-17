@@ -1,0 +1,16 @@
+# Editor configuration, see https://editorconfig.org
+root = true
+
+# Default config
+[*]
+# space (size: 2)
+indent_style = space
+indent_size = 4
+
+# Unix line ending format
+end_of_line = lf
+
+charset = utf-8
+
+insert_final_newline = true
+trim_trailing_whitespace = true
